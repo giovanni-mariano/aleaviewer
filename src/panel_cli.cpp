@@ -45,9 +45,9 @@ static int input_callback(ImGuiInputTextCallbackData* data) {
 static void tab_log(AppState& app) {
     // Log area (scrollable)
     float input_height = ImGui::GetFrameHeightWithSpacing() * 2.0f;
-    ImGui::BeginChild("LogRegion", ImVec2(0, -input_height), ImGuiChildFlags_None,
-                      ImGuiWindowFlags_HorizontalScrollbar);
+    ImGui::BeginChild("LogRegion", ImVec2(0, -input_height), ImGuiChildFlags_None);
 
+    ImGui::PushTextWrapPos(0.0f);  // Wrap at window edge
     for (auto& line : app.log_lines) {
         if (line.size() > 7 && line.substr(0, 7) == "[ERROR]") {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.400f, 0.380f, 1.0f));  // #FF6661
@@ -63,6 +63,7 @@ static void tab_log(AppState& app) {
             ImGui::PopStyleColor();
         }
     }
+    ImGui::PopTextWrapPos();
 
     if (app.scroll_to_bottom) {
         ImGui::SetScrollHereY(1.0f);

@@ -118,37 +118,38 @@ static void render_cell_properties(AppState& app) {
 
     // Properties table
     if (ImGui::BeginTable("##props", 2, ImGuiTableFlags_SizingFixedFit)) {
-        ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, 90);
-        ImGui::TableSetupColumn("Val");
+        float key_w = ImGui::CalcTextSize("Material  ").x;
+        ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, key_w);
+        ImGui::TableSetupColumn("Val", ImGuiTableColumnFlags_WidthStretch);
 
         ImGui::TableNextRow(); ImGui::TableNextColumn();
         ImGui::TextDisabled("Material"); ImGui::TableNextColumn();
-        ImGui::Text("%d", info.material_id);
+        ImGui::TextWrapped("%d", info.material_id);
 
         ImGui::TableNextRow(); ImGui::TableNextColumn();
         ImGui::TextDisabled("Density"); ImGui::TableNextColumn();
-        ImGui::Text("%.6g", info.density);
+        ImGui::TextWrapped("%.6g", info.density);
 
         ImGui::TableNextRow(); ImGui::TableNextColumn();
         ImGui::TextDisabled("Universe"); ImGui::TableNextColumn();
-        ImGui::Text("%d", info.universe_id);
+        ImGui::TextWrapped("%d", info.universe_id);
 
         if (info.fill_universe >= 0) {
             ImGui::TableNextRow(); ImGui::TableNextColumn();
             ImGui::TextDisabled("Fill"); ImGui::TableNextColumn();
-            ImGui::Text("%d", info.fill_universe);
+            ImGui::TextWrapped("%d", info.fill_universe);
         }
 
         if (info.lat_type > 0) {
             ImGui::TableNextRow(); ImGui::TableNextColumn();
             ImGui::TextDisabled("Lattice"); ImGui::TableNextColumn();
-            ImGui::Text("type=%d  pitch=[%.3f, %.3f, %.3f]",
+            ImGui::TextWrapped("type=%d  pitch=[%.3f, %.3f, %.3f]",
                         info.lat_type, info.lat_pitch[0], info.lat_pitch[1], info.lat_pitch[2]);
         }
 
         ImGui::TableNextRow(); ImGui::TableNextColumn();
         ImGui::TextDisabled("BBox"); ImGui::TableNextColumn();
-        ImGui::Text("[%.2f,%.2f] x [%.2f,%.2f] x [%.2f,%.2f]",
+        ImGui::TextWrapped("[%.2f,%.2f] x [%.2f,%.2f] x [%.2f,%.2f]",
                     info.bbox.min_x, info.bbox.max_x,
                     info.bbox.min_y, info.bbox.max_y,
                     info.bbox.min_z, info.bbox.max_z);
@@ -185,17 +186,18 @@ static void render_surface_properties(AppState& app) {
     ImGui::Text("Surface %d", sid);
 
     if (ImGui::BeginTable("##sprops", 2, ImGuiTableFlags_SizingFixedFit)) {
-        ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, 90);
-        ImGui::TableSetupColumn("Val");
+        float key_w = ImGui::CalcTextSize("Material  ").x;
+        ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, key_w);
+        ImGui::TableSetupColumn("Val", ImGuiTableColumnFlags_WidthStretch);
 
         ImGui::TableNextRow(); ImGui::TableNextColumn();
         ImGui::TextDisabled("Type"); ImGui::TableNextColumn();
-        ImGui::Text("%s", prim_type_name(ptype));
+        ImGui::TextWrapped("%s", prim_type_name(ptype));
 
         ImGui::TableNextRow(); ImGui::TableNextColumn();
         ImGui::TextDisabled("Boundary"); ImGui::TableNextColumn();
         const char* bnames[] = {"Transmissive", "Reflective", "White", "Periodic", "Vacuum"};
-        ImGui::Text("%s", bnames[btype < 5 ? btype : 0]);
+        ImGui::TextWrapped("%s", bnames[btype < 5 ? btype : 0]);
 
         // Show primitive data
         alea_primitive_data_t pdata;
@@ -204,73 +206,73 @@ static void render_surface_properties(AppState& app) {
                 case ALEA_PRIMITIVE_PLANE:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Coeffs"); ImGui::TableNextColumn();
-                    ImGui::Text("%.6g %.6g %.6g %.6g",
+                    ImGui::TextWrapped("%.6g %.6g %.6g %.6g",
                                 pdata.plane.a, pdata.plane.b, pdata.plane.c, pdata.plane.d);
                     break;
                 case ALEA_PRIMITIVE_SPHERE:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Center"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g, %.4g)",
+                    ImGui::TextWrapped("(%.4g, %.4g, %.4g)",
                                 pdata.sphere.center_x, pdata.sphere.center_y, pdata.sphere.center_z);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Radius"); ImGui::TableNextColumn();
-                    ImGui::Text("%.6g", pdata.sphere.radius);
+                    ImGui::TextWrapped("%.6g", pdata.sphere.radius);
                     break;
                 case ALEA_PRIMITIVE_CYLINDER_Z:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Center"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g)", pdata.cyl_z.center_x, pdata.cyl_z.center_y);
+                    ImGui::TextWrapped("(%.4g, %.4g)", pdata.cyl_z.center_x, pdata.cyl_z.center_y);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Radius"); ImGui::TableNextColumn();
-                    ImGui::Text("%.6g", pdata.cyl_z.radius);
+                    ImGui::TextWrapped("%.6g", pdata.cyl_z.radius);
                     break;
                 case ALEA_PRIMITIVE_CYLINDER_X:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Center"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g)", pdata.cyl_x.center_y, pdata.cyl_x.center_z);
+                    ImGui::TextWrapped("(%.4g, %.4g)", pdata.cyl_x.center_y, pdata.cyl_x.center_z);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Radius"); ImGui::TableNextColumn();
-                    ImGui::Text("%.6g", pdata.cyl_x.radius);
+                    ImGui::TextWrapped("%.6g", pdata.cyl_x.radius);
                     break;
                 case ALEA_PRIMITIVE_CYLINDER_Y:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Center"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g)", pdata.cyl_y.center_x, pdata.cyl_y.center_z);
+                    ImGui::TextWrapped("(%.4g, %.4g)", pdata.cyl_y.center_x, pdata.cyl_y.center_z);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Radius"); ImGui::TableNextColumn();
-                    ImGui::Text("%.6g", pdata.cyl_y.radius);
+                    ImGui::TextWrapped("%.6g", pdata.cyl_y.radius);
                     break;
                 case ALEA_PRIMITIVE_CONE_X:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Apex"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g, %.4g)", pdata.cone_x.apex_x,
+                    ImGui::TextWrapped("(%.4g, %.4g, %.4g)", pdata.cone_x.apex_x,
                                 pdata.cone_x.apex_y, pdata.cone_x.apex_z);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("tan^2"); ImGui::TableNextColumn();
-                    ImGui::Text("%.6g", pdata.cone_x.tan_angle_sq);
+                    ImGui::TextWrapped("%.6g", pdata.cone_x.tan_angle_sq);
                     break;
                 case ALEA_PRIMITIVE_CONE_Y:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Apex"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g, %.4g)", pdata.cone_y.apex_x,
+                    ImGui::TextWrapped("(%.4g, %.4g, %.4g)", pdata.cone_y.apex_x,
                                 pdata.cone_y.apex_y, pdata.cone_y.apex_z);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("tan^2"); ImGui::TableNextColumn();
-                    ImGui::Text("%.6g", pdata.cone_y.tan_angle_sq);
+                    ImGui::TextWrapped("%.6g", pdata.cone_y.tan_angle_sq);
                     break;
                 case ALEA_PRIMITIVE_CONE_Z:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Apex"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g, %.4g)", pdata.cone_z.apex_x,
+                    ImGui::TextWrapped("(%.4g, %.4g, %.4g)", pdata.cone_z.apex_x,
                                 pdata.cone_z.apex_y, pdata.cone_z.apex_z);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("tan^2"); ImGui::TableNextColumn();
-                    ImGui::Text("%.6g", pdata.cone_z.tan_angle_sq);
+                    ImGui::TextWrapped("%.6g", pdata.cone_z.tan_angle_sq);
                     break;
                 case ALEA_PRIMITIVE_RPP:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Extents"); ImGui::TableNextColumn();
-                    ImGui::Text("[%.4g,%.4g] x [%.4g,%.4g] x [%.4g,%.4g]",
+                    ImGui::TextWrapped("[%.4g,%.4g] x [%.4g,%.4g] x [%.4g,%.4g]",
                                 pdata.box.min_x, pdata.box.max_x,
                                 pdata.box.min_y, pdata.box.max_y,
                                 pdata.box.min_z, pdata.box.max_z);
@@ -278,15 +280,15 @@ static void render_surface_properties(AppState& app) {
                 case ALEA_PRIMITIVE_QUADRIC:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Coeffs"); ImGui::TableNextColumn();
-                    ImGui::Text("A=%.6g B=%.6g C=%.6g",
+                    ImGui::TextWrapped("A=%.6g B=%.6g C=%.6g",
                                 pdata.quadric.coeffs[0], pdata.quadric.coeffs[1], pdata.quadric.coeffs[2]);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TableNextColumn();
-                    ImGui::Text("D=%.6g E=%.6g F=%.6g",
+                    ImGui::TextWrapped("D=%.6g E=%.6g F=%.6g",
                                 pdata.quadric.coeffs[3], pdata.quadric.coeffs[4], pdata.quadric.coeffs[5]);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TableNextColumn();
-                    ImGui::Text("G=%.6g H=%.6g I=%.6g J=%.6g",
+                    ImGui::TextWrapped("G=%.6g H=%.6g I=%.6g J=%.6g",
                                 pdata.quadric.coeffs[6], pdata.quadric.coeffs[7],
                                 pdata.quadric.coeffs[8], pdata.quadric.coeffs[9]);
                     break;
@@ -295,25 +297,25 @@ static void render_surface_properties(AppState& app) {
                 case ALEA_PRIMITIVE_TORUS_Z:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Center"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g, %.4g)",
+                    ImGui::TextWrapped("(%.4g, %.4g, %.4g)",
                                 pdata.torus.center_x, pdata.torus.center_y, pdata.torus.center_z);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Radii"); ImGui::TableNextColumn();
-                    ImGui::Text("R=%.6g r=%.6g B=%.6g",
+                    ImGui::TextWrapped("R=%.6g r=%.6g B=%.6g",
                                 pdata.torus.major_radius, pdata.torus.minor_radius, pdata.torus.axial_semiwidth_B);
                     break;
                 case ALEA_PRIMITIVE_RCC:
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Base"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g, %.4g)",
+                    ImGui::TextWrapped("(%.4g, %.4g, %.4g)",
                                 pdata.rcc.base_x, pdata.rcc.base_y, pdata.rcc.base_z);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Height"); ImGui::TableNextColumn();
-                    ImGui::Text("(%.4g, %.4g, %.4g)",
+                    ImGui::TextWrapped("(%.4g, %.4g, %.4g)",
                                 pdata.rcc.height_x, pdata.rcc.height_y, pdata.rcc.height_z);
                     ImGui::TableNextRow(); ImGui::TableNextColumn();
                     ImGui::TextDisabled("Radius"); ImGui::TableNextColumn();
-                    ImGui::Text("%.6g", pdata.rcc.radius);
+                    ImGui::TextWrapped("%.6g", pdata.rcc.radius);
                     break;
                 default:
                     break;

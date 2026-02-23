@@ -473,16 +473,25 @@ void panel_slice(AppState& app) {
             { app.show_contours = !app.show_contours; app.needs_recolor = true; }
         ImGui::SameLine();
 
-        if (toggle_button("S", app.show_curves, "Surface curves (analytical)"))
-            { app.show_curves = !app.show_curves; }
+        if (toggle_button("S", app.show_curves, "Surface curves (analytical)")) {
+            app.show_curves = !app.show_curves;
+            if (app.show_curves && app.slice_curves.empty())
+                app_request_rerender(app);
+        }
         ImGui::SameLine();
 
-        if (toggle_button("SL", app.show_surface_labels, "Surface labels"))
-            { app.show_surface_labels = !app.show_surface_labels; }
+        if (toggle_button("SL", app.show_surface_labels, "Surface labels")) {
+            app.show_surface_labels = !app.show_surface_labels;
+            if (app.show_surface_labels && app.slice_surface_labels.empty())
+                app_request_rerender(app);
+        }
         ImGui::SameLine();
 
-        if (toggle_button("L", app.show_labels, "Labels"))
-            { app.show_labels = !app.show_labels; }
+        if (toggle_button("L", app.show_labels, "Labels")) {
+            app.show_labels = !app.show_labels;
+            if (app.show_labels && app.slice_labels.empty())
+                app_request_rerender(app);
+        }
         ImGui::SameLine();
 
         if (toggle_button("G", app.show_grid, "Grid"))

@@ -517,6 +517,7 @@ int main(int argc, char* argv[]) {
 
     // Main loop
     bool quit = false;
+    int frames_until_maximize = 3;  // Wayland needs window mapped before maximize; dock layout waits for this
     while (!quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -571,19 +572,19 @@ int main(int argc, char* argv[]) {
 
         ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
 
-        if (app.first_frame) {
+        if (app.first_frame && frames_until_maximize <= 0) {
             ImGui::DockBuilderRemoveNode(dockspace_id);
             ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
             ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->WorkSize);
 
             ImGuiID dock_main = dockspace_id;
-            ImGuiID dock_right = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Right, 0.22f, nullptr, &dock_main);
-            ImGuiID dock_left = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Left, 0.22f, nullptr, &dock_main);
-            ImGuiID dock_bottom = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Down, 0.45f, nullptr, &dock_main);
+            ImGuiID dock_right = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Right, 0.30f, nullptr, &dock_main);
+            ImGuiID dock_left = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Left, 0.30f, nullptr, &dock_main);
+            ImGuiID dock_right_bottom = ImGui::DockBuilderSplitNode(dock_right, ImGuiDir_Down, 0.40f, nullptr, &dock_right);
             ImGui::DockBuilderDockWindow("2D Slice", dock_main);
             ImGui::DockBuilderDockWindow("Browser", dock_left);
             ImGui::DockBuilderDockWindow("Properties", dock_right);
-            ImGui::DockBuilderDockWindow("Console", dock_bottom);
+            ImGui::DockBuilderDockWindow("Console", dock_right_bottom);
 
             ImGui::DockBuilderFinish(dockspace_id);
             app.first_frame = false;
@@ -655,6 +656,11 @@ int main(int argc, char* argv[]) {
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
+
+        // Wayland: maximize after window is mapped and visible
+        if (frames_until_maximize > 0 && --frames_until_maximize == 0) {
+            SDL_MaximizeWindow(window);
+        }
     }
 
     // Cleanup
