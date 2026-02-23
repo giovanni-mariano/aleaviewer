@@ -79,6 +79,16 @@ void app_init(AppState& app) {
 }
 
 void app_shutdown(AppState& app) {
+    // Wait for any in-progress file load
+    if (app.load_thread.joinable()) {
+        alea_interrupt();
+        app.load_thread.join();
+    }
+    if (app.loaded_sys) {
+        alea_destroy(app.loaded_sys);
+        app.loaded_sys = nullptr;
+    }
+
     slice_worker_stop(app);
     if (app.texture_id) {
         glDeleteTextures(1, &app.texture_id);
@@ -137,35 +147,85 @@ void app_zoom_fit(AppState& app) {
 // ---------------------------------------------------------------------------
 
 bool app_load_file(AppState& app, const std::string& path) {
-    // Determine format from extension
-    alea_system_t* sys = nullptr;
-
-    // Try OpenMC if .xml
-    if (path.size() > 4 && path.substr(path.size()-4) == ".xml") {
-        sys = alea_load_openmc(path.c_str());
-    } else {
-        sys = alea_load_mcnp(path.c_str());
-    }
-
-    if (!sys) {
-        app_log_error(app, "Failed to load '%s': %s", path.c_str(), alea_error());
+    if (app.loading.load()) {
+        app_log(app, "Already loading a file, please wait...");
         return false;
     }
 
-    // Destroy old system
-    if (app.sys) alea_destroy(app.sys);
-    app.sys = sys;
-    app.loaded_file = path;
-    app.index_built = false;
+    // Join previous load thread if any
+    if (app.load_thread.joinable())
+        app.load_thread.join();
+    if (app.loaded_sys) {
+        alea_destroy(app.loaded_sys);
+        app.loaded_sys = nullptr;
+    }
 
-    // Build indices
-    alea_build_universe_index(app.sys);
-    alea_build_spatial_index(app.sys);
+    app.load_path = path;
+    app.load_error.clear();
+    app.load_done.store(false);
+    app.loading.store(true);
+
+    app.load_thread = std::thread([&app, path]() {
+        alea_clear_interrupt();
+
+        // Determine format from extension
+        alea_system_t* sys = nullptr;
+        if (path.size() > 4 && path.substr(path.size()-4) == ".xml") {
+            sys = alea_load_openmc(path.c_str());
+        } else {
+            sys = alea_load_mcnp(path.c_str());
+        }
+
+        if (!sys) {
+            std::lock_guard<std::mutex> lock(app.load_mutex);
+            app.load_error = alea_error() ? alea_error() : "Unknown error";
+            app.load_done.store(true);
+            return;
+        }
+
+        // Build indices (heavy work)
+        alea_build_universe_index(sys);
+        alea_build_spatial_index(sys);
+
+        {
+            std::lock_guard<std::mutex> lock(app.load_mutex);
+            app.loaded_sys = sys;
+        }
+        app.load_done.store(true);
+    });
+
+    return true;
+}
+
+void app_load_consume(AppState& app) {
+    app.load_done.store(false);
+
+    // Join the loader thread
+    if (app.load_thread.joinable())
+        app.load_thread.join();
+
+    std::lock_guard<std::mutex> lock(app.load_mutex);
+
+    if (!app.load_error.empty()) {
+        app_log_error(app, "Failed to load '%s': %s",
+                      app.load_path.c_str(), app.load_error.c_str());
+        app.loading.store(false);
+        return;
+    }
+
+    // Swap in the new system
+    if (app.sys) alea_destroy(app.sys);
+    app.sys = app.loaded_sys;
+    app.loaded_sys = nullptr;
+    app.loaded_file = app.load_path;
     app.index_built = true;
 
     app_log(app, "Loaded '%s': %d cells, %d surfaces",
-            path.c_str(), (int)alea_cell_count(app.sys), (int)alea_surface_count(app.sys));
+            app.load_path.c_str(),
+            (int)alea_cell_count(app.sys),
+            (int)alea_surface_count(app.sys));
 
+    // Reset view state
     app.selected_cell_index = -1;
     app.selected_surface_index = -1;
     app.slice_curves.clear();
@@ -176,8 +236,9 @@ bool app_load_file(AppState& app, const std::string& path) {
 
     // Zoom to fit
     app_zoom_fit(app);
+    app_request_rerender(app);
 
-    return true;
+    app.loading.store(false);
 }
 
 // ---------------------------------------------------------------------------

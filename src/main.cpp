@@ -534,6 +534,11 @@ int main(int argc, char* argv[]) {
             slice_worker_consume(app);
         }
 
+        // Consume async file load results
+        if (app.load_done.load()) {
+            app_load_consume(app);
+        }
+
 
 
         // Start new frame
@@ -595,6 +600,32 @@ int main(int argc, char* argv[]) {
         if (app.show_bottom_panel) panel_cli(app);
 
         panel_status(app);
+
+        // Loading overlay
+        if (app.loading.load()) {
+            ImGuiViewport* vp = ImGui::GetMainViewport();
+            ImGui::SetNextWindowPos(vp->GetCenter(), ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+            ImGui::SetNextWindowSize(ImVec2(0, 0));
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 8.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(24, 16));
+            if (ImGui::Begin("##Loading", nullptr,
+                    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                    ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+                    ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoNav)) {
+                // Animated spinner dots
+                const char* dots[] = {".", "..", "..."};
+                int phase = (int)(ImGui::GetTime() / 0.4) % 3;
+
+                // Extract filename from path
+                std::string fname = app.load_path;
+                auto pos = fname.find_last_of("/\\");
+                if (pos != std::string::npos) fname = fname.substr(pos + 1);
+
+                ImGui::Text("Loading %s%s", fname.c_str(), dots[phase]);
+            }
+            ImGui::End();
+            ImGui::PopStyleVar(2);
+        }
 
         // Fast recolor path (no re-slice needed)
         if (app.needs_recolor && !app.cell_ids.empty()) {

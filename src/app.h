@@ -248,6 +248,15 @@ struct AppState {
     double slice_up[3]     = {0, 1, 0};
 
 
+    // Async file loading
+    std::atomic<bool> loading{false};
+    std::atomic<bool> load_done{false};
+    std::mutex        load_mutex;
+    alea_system_t*    loaded_sys = nullptr;
+    std::string       load_path;
+    std::string       load_error;
+    std::thread       load_thread;
+
     // 3D raycast state
     RaycastState rc;
 };
@@ -260,6 +269,7 @@ struct AppState {
 void app_init(AppState& app);
 void app_shutdown(AppState& app);
 bool app_load_file(AppState& app, const std::string& path);
+void app_load_consume(AppState& app);
 void app_log(AppState& app, const char* fmt, ...);
 void app_log_error(AppState& app, const char* fmt, ...);
 void app_request_rerender(AppState& app);
