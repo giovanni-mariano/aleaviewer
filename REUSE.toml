@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2026 Giovanni MARIANO
+#
+# SPDX-License-Identifier: MPL-2.0
+
+version = 1
+SPDX-PackageName = "aleaviewer"
+SPDX-PackageSupplier = "Giovanni MARIANO"
+SPDX-PackageDownloadLocation = "https://github.com/giovanni-mariano/aleaviewer"
+
+# Application source code
+[[annotations]]
+path = "src/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Giovanni MARIANO"
+SPDX-License-Identifier = "MPL-2.0"
+
+# Build system and configuration
+[[annotations]]
+path = "Makefile"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Giovanni MARIANO"
+SPDX-License-Identifier = "MPL-2.0"
+
+# Documentation
+[[annotations]]
+path = "**.md"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Giovanni MARIANO"
+SPDX-License-Identifier = "MPL-2.0"
+
+# Config and metadata files
+[[annotations]]
+path = ".gitmodules"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Giovanni MARIANO"
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = ".gitignore"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Giovanni MARIANO"
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = ".github/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Giovanni MARIANO"
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = "REUSE.toml"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Giovanni MARIANO"
+SPDX-License-Identifier = "MPL-2.0"
+
+# Vendor: imgui (MIT)
+[[annotations]]
+path = "vendor/imgui/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2014-2026 Omar Cornut"
+SPDX-License-Identifier = "MIT"
+
+# Vendor: libalea (MPL-2.0)
+[[annotations]]
+path = "vendor/libalea/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Giovanni MARIANO"
+SPDX-License-Identifier = "MPL-2.0"

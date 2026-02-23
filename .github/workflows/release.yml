@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libsdl2-dev libgl-dev g++
+
+      - name: Build libalea
+        run: make libalea
+
+      - name: Build aleaviewer
+        run: make
+
+      - name: Package
+        run: |
+          mkdir -p aleaviewer-linux-x86_64
+          cp bin/aleaviewer aleaviewer-linux-x86_64/
+          cp README.md LICENSES/MPL-2.0.txt aleaviewer-linux-x86_64/
+          tar czf aleaviewer-linux-x86_64.tar.gz aleaviewer-linux-x86_64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aleaviewer-linux-x86_64
+          path: aleaviewer-linux-x86_64.tar.gz
+
+  build-macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: brew install sdl2
+
+      - name: Build libalea
+        run: make libalea CXX=clang++
+
+      - name: Build aleaviewer
+        run: make CXX=clang++
+
+      - name: Package
+        run: |
+          mkdir -p aleaviewer-macos-arm64
+          cp bin/aleaviewer aleaviewer-macos-arm64/
+          cp README.md LICENSES/MPL-2.0.txt aleaviewer-macos-arm64/
+          tar czf aleaviewer-macos-arm64.tar.gz aleaviewer-macos-arm64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: aleaviewer-macos-arm64
+          path: aleaviewer-macos-arm64.tar.gz
+
+  release:
+    needs: [build-linux, build-macos]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            artifacts/aleaviewer-linux-x86_64/aleaviewer-linux-x86_64.tar.gz
+            artifacts/aleaviewer-macos-arm64/aleaviewer-macos-arm64.tar.gz
